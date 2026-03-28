@@ -130,6 +130,7 @@ console.log(error);
 });
 function startBot(message) {
     (message) ? logger(message, "[ Bắt đầu ]") : "";
+    if (typeof global.countRestart !== "number") global.countRestart = 0;
 
     const child = spawn("node", ["--trace-warnings", "--async-stack-traces", "main.js"], {
         cwd: __dirname,
@@ -137,9 +138,12 @@ function startBot(message) {
         shell: true
     });
     child.on("close", (codeExit) => {
-        if (codeExit != 0 || global.countRestart && global.countRestart < 5) {
+        if (codeExit !== 0 && global.countRestart < 5) {
             startBot("Mirai Loading - Tiến Hành Khởi Động Lại");
             global.countRestart += 1;
+            return;
+        } else if (codeExit !== 0) {
+            logger("Bot đã dừng sau 5 lần thử khởi động lại không thành công", "[ Bắt đầu ]");
             return;
         } else return;
     });
@@ -215,7 +219,7 @@ async function login(){
             }
     }).catch(async function (error) {
         var data = error.response.data.error.error_data;
-        form.twofactor_code = totp(decodeURI(fa).replace(/\s+/g, '').toLowerCase())
+        form.twofactor_code = normalizeTotpCode(decodeURI(fa).replace(/\s+/g, '').toLowerCase())
         form.encrypted_msisdn = ""
         form.userid = data.uid
         form.machine_id = data.machine_id
@@ -302,6 +306,13 @@ function sort(string) {
     for (i in sor)
         data[sor[i]] = string[sor[i]]
     return data
+}
+
+function normalizeTotpCode(secret) {
+    const token = totp(secret);
+    if (typeof token === "string") return token;
+    if (token && typeof token.otp === "string") return token.otp;
+    throw new Error("Không thể tạo mã OTP từ totp-generator");
 }
 /////////////////////////////////////
 const logo = `
