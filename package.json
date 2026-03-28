@@ -1,12 +1,15 @@
 {
   "name": "Gojo.Bot",
-  "version": "1.2.15",
+  "version": "1.2.16",
   "description": "A simple Facebook Messenger Bot made by me(CatalizCS) and my brother SpermLord.",
   "main": "gojo.js",
   "scripts": {
-    "start": "node index",
+    "start": "node index.js",
     "login": "node login",
-    "test": "node --trace-warnings --use_strict --async-stack-traces mirai"
+    "test": "node --check index.js && node --check main.js"
+  },
+  "engines": {
+    "node": ">=18.18.0"
   },
   "repository": {
     "type": "git",
